@@ -6,14 +6,14 @@ This is a repository for Hybrid HPC Cloud POC project.
 
 Shown below are descriptions of each blueprint directory.
 
-all - All workload experiment blueprints
-bolton - Dr. Kelly Bolton’s Lab workload experiment blueprints
-holehouse - Dr. Alex Holehouse’s Lab workload experiment blueprints
-interactive - Interactive workload experiment blueprints
-jin - Dr. Peter Jin’s Lab workload experiment blueprints
-mix - Mix workload experiment blueprints
-swamidass - Dr. Joshua Swamidass’s Lab workload experiment blueprints
-wang - Dr. Jian Wang’s Lab workload experiment blueprints
+* all - All workload experiment blueprints
+* bolton - Dr. Kelly Bolton’s Lab workload experiment blueprints
+* holehouse - Dr. Alex Holehouse’s Lab workload experiment blueprints
+* interactive - Interactive workload experiment blueprints
+* jin - Dr. Peter Jin’s Lab workload experiment blueprints
+* mix - Mix workload experiment blueprints
+* swamidass - Dr. Joshua Swamidass’s Lab workload experiment blueprints
+* wang - Dr. Jian Wang’s Lab workload experiment blueprints
 
 ## Deployment
 
