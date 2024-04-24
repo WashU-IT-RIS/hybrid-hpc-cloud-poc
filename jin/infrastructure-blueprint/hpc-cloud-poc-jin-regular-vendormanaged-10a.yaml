@@ -1,0 +1,123 @@
+---
+blueprint_name: jin-r-vm-10a
+
+vars:
+  project_id: hpc-in-gcp
+  host_project_id: ris-network-host-dev
+  deployment_name: jin-r-vm-10a
+  region: us-central1
+  zone: us-central1-c
+  custom_tags: ["icmp", "http-https", "ssh", "hpc-in-gcp"]
+  instance_image:
+    # Please refer to the following link for the latest images:
+    # https://github.com/SchedMD/slurm-gcp/blob/master/docs/images.md#supported-operating-systems
+    # In case need to change the images
+    family: slurm-gcp-5-9-ubuntu-2004-lts
+    project: schedmd-slurm-public
+
+deployment_groups:
+- group: primary
+  modules:
+  - id: network1
+    source: modules/network/pre-existing-vpc
+    settings:
+      project_id: $(vars.host_project_id)
+      network_name: ris-network-host-dev-network
+      subnetwork_name: hpc-in-gcp-subnetwork
+
+  #Scratch storage space  (Temp scratch space)
+  - id: gcp_scratch
+    source: modules/file-system/filestore
+    use: [network1]
+    settings:
+      project_id: $(vars.project_id)
+      filestore_tier: BASIC_SSD
+      size_gb: 4096
+      local_mount: /storage1/fs1/hpc-cloud-poc/Active
+      connect_mode: PRIVATE_SERVICE_ACCESS
+
+  #Pre staged object storage (home storage)
+  #Ensure bucket is created before "gcp_object_storage"
+  - id: gcp_object_storage
+    source: modules/file-system/pre-existing-network-storage
+    settings:
+      remote_mount: gcp_object_storage
+      local_mount: /gcp_object_storage
+      fs_type: gcsfuse
+      mount_options: defaults,_netdev,implicit_dirs
+
+  #CPU regular nodegroup and queue
+  - id: general
+    source: community/modules/compute/schedmd-slurm-gcp-v5-node-group
+    settings:
+      node_count_dynamic_max: 100
+      machine_type: n2-standard-32
+      tags: $(vars.custom_tags)
+
+  - id: general_partition
+    source: community/modules/compute/schedmd-slurm-gcp-v5-partition
+    use:
+    - network1
+    - gcp_scratch
+    - general
+    - startup-script
+    settings:
+      partition_name: general
+      enable_placement: false
+      exclusive: false
+      is_default: true
+      partition_conf:
+        Oversubscribe: NO
+
+  #SLURM controller and client
+  - id: slurm_controller
+    source: community/modules/scheduler/schedmd-slurm-gcp-v5-controller
+    use:
+    - network1
+    - general_partition
+    - gcp_scratch
+    - startup-script-controller
+    settings:
+      disable_controller_public_ips: true
+      tags: $(vars.custom_tags)
+
+  - id: slurm_login
+    source: community/modules/scheduler/schedmd-slurm-gcp-v5-login
+    use:
+    - network1
+    - slurm_controller
+    - startup-script
+    - gcp_scratch
+    settings:
+      machine_type: n2-standard-4
+      disable_login_public_ips: true
+      tags: $(vars.custom_tags)
+
+
+  - id: startup-script
+    source: modules/scripts/startup-script
+    settings:
+      runners:
+      - type: shell
+        destination: "/tmp/mysetup.sh"
+        content: |
+          #!/bin/bash
+          apt update
+          apt install -y primesieve
+          apt install -y docker.io
+          chmod a+s /usr/bin/docker
+
+  - id: startup-script-controller
+    source: modules/scripts/startup-script
+    settings:
+      runners:
+      - type: shell
+        destination: "/tmp/mysetup.sh"
+        content: |
+          #!/bin/bash
+          apt update
+          apt install -y primesieve
+          apt install -y docker.io
+          chmod a+s /usr/bin/docker
+          sudo chmod 777 /storage1/fs1/hpc-cloud-poc/Active
+          mkdir -p /storage1/fs1/hpc-cloud-poc/Active/bin/ &&  gsutil -m rsync -r  gs://hpc-cloud-poc-backup/bin /storage1/fs1/hpc-cloud-poc/Active/bin/
