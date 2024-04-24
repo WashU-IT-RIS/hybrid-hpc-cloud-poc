@@ -24,7 +24,7 @@ step-by-step instructions.
    deploy.  Shown below is an example command.
    ```bash
    cd jin//infrastructure-blueprint
-   ```bash
+   ```
 2. Deploy using `ghpc`.  Shown below is an example command.
    ```bash
    ./ghpc deploy hpc-cloud-poc-jin-regular-vendormanaged-8b.yaml
