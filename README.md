@@ -20,14 +20,28 @@ Shown below are descriptions of each blueprint directory.
 The deployment is using the Google HPC Toolkit.  Shown below are
 step-by-step instructions.
 
-1. Change directory to the directory of a blueprint that you would like to
-   deploy.  Shown below is an example command.
+1. Create a directory for the Google HPC-Toolkit and hybrid-hpc-cloud-poc git
+   repositories.  All examples are using the directory "/tmp/".
+2. Install Google HPC-Toolkit.  Shown below are example commands.
    ```bash
-   cd jin//infrastructure-blueprint
+   cd /tmp/
+   git clone https://github.com/GoogleCloudPlatform/hpc-toolkit
+   cd hpc-toolkit
+   make
+   ```
+3. Clone this repository.  Shown below are example commands.
+
+   ```bash
+   cd /tmp/
+   git clone https://github.com/WashU-IT-RIS/hybrid-hpc-cloud-poc
+   ```
+4. Change directory to the HPC-Toolkit directory.  Shown below is an example command.
+   ```bash
+   cd /tmp/hpc-toolkit
    ```
 2. Deploy using `ghpc`.  Shown below is an example command.
    ```bash
-   ./ghpc deploy hpc-cloud-poc-jin-regular-vendormanaged-8b.yaml
+   ./ghpc deploy /tmp/hybrid-hpc-cloud-poc/jin/infrastructure-blueprint/hpc-cloud-poc-jin-regular-vendormanaged-8b.yaml
    ```
 
 ## Cleanup
